@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int        @id @unique @default(autoincrement())
+  login     String     @unique
+  password  String     @default("1111")
+  role      ROLE
+  team      Team?
+  sportsman Sportsman?
+  judge     Judges?
+}
+
+model Team {
+  name      String      @unique
+  user      User        @relation(fields: [id], references: [id])
+  id        Int         @id @unique
+  sportsman Sportsman[]
+}
+
+model Judges {
+  name String
+  user User   @relation(fields: [id], references: [id])
+  id   Int    @id
+}
+
+model Sportsman {
+  name     String
+  sex      SEX
+  year     Int
+  category String
+  user     User   @relation(fields: [id], references: [id])
+  id       Int    @id @unique
+  team     Team?  @relation(fields: [idTeam], references: [id])
+  idTeam   Int?
+  competitionCategoryResult CompetitionCategoryResult[]
+}
+
+model Competition {
+  id                  Int                   @id @unique @default(autoincrement())
+  name                String
+  date                DateTime              @db.Date
+  description         String
+  competitionCategory CompetitionCategory[]
+}
+
+model CompetitionCategory {
+  id            Int          @id @unique @default(autoincrement())
+  competition   Competition? @relation(fields: [idCompetition], references: [id])
+  idCompetition Int?
+  category      Category?    @relation(fields: [idCategory], references: [id])
+  idCategory    Int?
+  competitionCategoryResult CompetitionCategoryResult[]
+}
+
+model Category {
+  id                  Int                   @id @unique @default(autoincrement())
+  category            String
+  ageGroup            AGE
+  competitionCategory CompetitionCategory[]
+}
+
+model CompetitionCategoryResult {
+  id            Int          @id @unique @default(autoincrement())
+  competitionCategory   CompetitionCategory? @relation(fields: [idCompetitionCategory], references: [id])
+  idCompetitionCategory Int?
+  sportsman      Sportsman?    @relation(fields: [idSportsman], references: [id])
+  idSportsman    Int?
+  timeInvoice Float
+}
+
+enum ROLE {
+  sportsman
+  judge
+  team
+}
+
+enum SEX {
+  male
+  female
+}
+
+enum AGE {
+  A
+  B
+  C
+  D
+  E
+}
